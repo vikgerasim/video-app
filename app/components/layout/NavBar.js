@@ -7,6 +7,7 @@ import { signOut } from 'firebase/auth';
 import { auth, db } from '@/app/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
+import Image from 'next/image';
 
 export default function Navbar() {
  const { user } = useAuth();
@@ -44,7 +45,14 @@ export default function Navbar() {
    <nav className="bg-white shadow-md">
      <div className="container mx-auto px-4">
        <div className="flex justify-between items-center h-16">
-         <Link href="/" className="text-xl font-bold">VG Automotive</Link>
+       <Link href="/" className="mt-4 mb-4 flex items-center">
+            <Image 
+              src="/VG_Logo.png"
+              alt="VG Automotive Logo"
+              width={180}
+              height={90}
+            />
+          </Link>
          
          <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-4">
            <input
