@@ -13,40 +13,40 @@ export default function SignIn() {
  const router = useRouter();
 
  const handleEmailSubmit = async (e) => {
-   e.preventDefault();
-   try {
-     if (isSignUp) {
-       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-       await setDoc(doc(db, 'users', userCredential.user.uid), {
-         email: userCredential.user.email,
-         createdAt: new Date().toISOString(),
-         isAdmin: false
-       });
-     } else {
-       await signInWithEmailAndPassword(auth, email, password);
-     }
-     router.push('/');
-   } catch (error) {
-     console.error('Auth error:', error);
-     alert(error.message);
-   }
- };
-
- const handleGoogleSignIn = async () => {
-   try {
-     const provider = new GoogleAuthProvider();
-     const result = await signInWithPopup(auth, provider);
-     await setDoc(doc(db, 'users', result.user.uid), {
-       email: result.user.email,
-       createdAt: new Date().toISOString(),
-       isAdmin: false
-     }, { merge: true });
-     router.push('/');
-   } catch (error) {
-     console.error('Google sign in error:', error);
-     alert(error.message);
-   }
- };
+    e.preventDefault();
+    try {
+      if (isSignUp) {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          email: userCredential.user.email,
+          createdAt: new Date().toISOString(),
+          isAdmin: email === 'gabriel.antonelli.actuariat@gmail.com'
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+      router.push('/');
+    } catch (error) {
+      console.error('Auth error:', error);
+      alert(error.message);
+    }
+   };
+   
+   const handleGoogleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      await setDoc(doc(db, 'users', result.user.uid), {
+        email: result.user.email,
+        createdAt: new Date().toISOString(),
+        isAdmin: result.user.email === 'gabriel.antonelli.actuariat@gmail.com'
+      }, { merge: true });
+      router.push('/');
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      alert(error.message);
+    }
+   };
 
  return (
    <div className="min-h-screen flex items-center justify-center">

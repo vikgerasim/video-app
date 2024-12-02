@@ -41,6 +41,7 @@ export default function UploadPage() {
        title,
        url: videoUrl,
        userId: user.uid,
+       thumbnailUrl: 'https://picsum.photos/800/400',
        createdAt: new Date().toISOString()
      });
      

@@ -4,19 +4,18 @@ import Link from 'next/link';
 
 export default function FeaturedVideo({ video }) {
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <Link href={`/videos/${video.id}`}>
+    <div suppressHydrationWarning className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <Link href={`/video/${video.id}`}>
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="relative aspect-video">
-            <Image 
-              src={video.thumbnailUrl}
-              alt={video.title}
-              fill
-              className="object-cover"
-            />
-            <div className="absolute bottom-4 right-4 bg-black bg-opacity-75 px-2 py-1 rounded text-white">
-              {video.duration}
+          <div className="relative aspect-video w-full bg-black">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-0 h-0 border-t-[30px] border-b-[30px] border-l-[50px] border-transparent border-l-white" />
             </div>
+            {video.duration && (
+              <div className="absolute bottom-4 right-4 bg-black bg-opacity-75 px-2 py-1 rounded text-white">
+                {video.duration}
+              </div>
+            )}
           </div>
           <div className="p-6">
             <h2 className="text-2xl font-bold mb-2">{video.title}</h2>
@@ -25,8 +24,6 @@ export default function FeaturedVideo({ video }) {
               <span className="font-medium text-gray-700">{video.userName}</span>
               <span className="mx-2">•</span>
               <span>{video.views} views</span>
-              <span className="mx-2">•</span>
-              <span>{new Date(video.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
