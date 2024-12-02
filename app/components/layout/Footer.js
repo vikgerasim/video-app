@@ -3,11 +3,11 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 py-8">
+    <footer className="bg-gray-100 py-8 pl-32 ml-24">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-bold mb-4">VideoApp</h3>
+            <h3 className="font-bold mb-4">VG Automotive</h3>
             <p className="text-gray-600">Share and discover amazing videos</p>
           </div>
           <div>
@@ -27,8 +27,8 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t text-center text-gray-600">
-          <p>&copy; {new Date().getFullYear()} VideoApp. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t text-gray-600">
+          <p>&copy; {new Date().getFullYear()} VG Automotive All rights reserved.</p>
         </div>
       </div>
     </footer>

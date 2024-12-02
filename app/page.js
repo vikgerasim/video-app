@@ -1,5 +1,4 @@
 // src/app/page.js
-
 "use client";
 
 import VideoGrid from '@/app/components/video/VideoGrid'
@@ -30,21 +29,19 @@ export default function Home() {
 
   if (loading) return <div>Loading...</div>;
 
-  const featuredVideo = videos[0];
-  const recentVideos = videos.slice(1);
+  const featuredVideos = videos.slice(0, 4);
+  const remainingVideos = videos.slice(4);
 
   return (
     <div className="space-y-8">
-      {featuredVideo && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">Featured Video</h2>
-          <FeaturedVideo video={featuredVideo} />
-        </div>
-      )}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-4">Featured Videos</h2>
+        <FeaturedVideo videos={featuredVideos} />
+      </div>
       
       <div>
-        <h2 className="text-2xl font-bold mb-4">Recent Videos</h2>
-        <VideoGrid videos={recentVideos} />
+        <h2 className="text-2xl font-bold mb-4">More Videos</h2>
+        <VideoGrid videos={remainingVideos} />
       </div>
     </div>
   )

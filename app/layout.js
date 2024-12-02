@@ -1,9 +1,8 @@
-// app/layout.js
-
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/app/context/AuthContext'
-import Navbar from '@/app/components/layout/NavBar' // Corrected casing
+import Navbar from '@/app/components/layout/NavBar'
+import Sidebar from '@/app/components/layout/Sidebar'
 import Footer from '@/app/components/layout/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -19,10 +18,13 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <AuthProvider>
           <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-grow container mx-auto px-4 py-8">
-              {children}
-            </main>
+            <Navbar className="z-40" />
+            <div className="flex flex-grow">
+              <Sidebar />
+              <main className="transition-all duration-300 flex-grow pl-16 mt-16 lg:pl-60 px-4 py-8">
+                {children}
+              </main>
+            </div>
             <Footer />
           </div>
         </AuthProvider>

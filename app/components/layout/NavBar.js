@@ -10,86 +10,87 @@ import { doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
 
 export default function Navbar() {
- const { user } = useAuth();
- const router = useRouter();
- const [isAdmin, setIsAdmin] = useState(false);
- const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useAuth();
+  const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
- useEffect(() => {
-   async function checkAdmin() {
-     if (!user) return;
-     const docRef = doc(db, 'users', user.uid);
-     const docSnap = await getDoc(docRef);
-     setIsAdmin(docSnap.data()?.isAdmin || false);
-   }
-   checkAdmin();
- }, [user]);
+  useEffect(() => {
+    async function checkAdmin() {
+      if (!user) return;
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+      setIsAdmin(docSnap.data()?.isAdmin || false);
+    }
+    checkAdmin();
+  }, [user]);
 
- const handleSignOut = async () => {
-   try {
-     await signOut(auth);
-     router.push('/signin');
-   } catch (error) {
-     console.error('Error signing out:', error);
-   }
- };
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
- const handleSearch = (e) => {
-   e.preventDefault();
-   if (searchQuery.trim()) {
-     router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-   }
- };
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
- return (
-   <nav className="bg-white shadow-md">
-     <div className="container mx-auto px-4">
-       <div className="flex justify-between items-center h-16">
-       <Link href="/" className="mt-4 mb-4 flex items-center">
+  return (
+    <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          <Link href="/" className="mt-4 mb-4 flex items-center relative z-50">
             <Image 
               src="/VG_Logo.png"
               alt="VG Automotive Logo"
               width={180}
               height={90}
+              className="relative z-50"
             />
           </Link>
-         
-         <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-4">
-           <input
-             type="search"
-             placeholder="Search videos..."
-             value={searchQuery}
-             onChange={(e) => setSearchQuery(e.target.value)}
-             className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:border-blue-500"
-           />
-         </form>
+          
+          <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-4">
+            <input
+              type="search"
+              placeholder="Search videos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:border-blue-500"
+            />
+          </form>
 
-         <div className="flex items-center space-x-4">
-           {user ? (
-             <>
-               {isAdmin && (
-                 <Link href="/upload" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                   Upload
-                 </Link>
-               )}
-               <Link href={`/profile/${user.uid}`} className="hover:text-gray-600">
-                 Profile
-               </Link>
-               <button 
-                 onClick={handleSignOut}
-                 className="hover:text-gray-600"
-               >
-                 Sign Out
-               </button>
-             </>
-           ) : (
-             <Link href="/signin" className="hover:text-gray-600">
-               Sign In
-             </Link>
-           )}
-         </div>
-       </div>
-     </div>
-   </nav>
- );
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Link href="/upload" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Upload
+                  </Link>
+                )}
+                <Link href={`/profile/${user.uid}`} className="hover:text-gray-600">
+                  Profile
+                </Link>
+                <button 
+                  onClick={handleSignOut}
+                  className="hover:text-gray-600"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <Link href="/signin" className="hover:text-gray-600">
+                Sign In
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
 }
