@@ -1,4 +1,4 @@
-// app/components/video/FeaturedVideo.js
+// FeaturedVideo.js
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -9,16 +9,16 @@ export default function FeaturedVideo({ videos }) {
         <div key={video.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
           <Link href={`/video/${video.id}`}>
             <div className="flex flex-col">
-              <div className="relative aspect-video w-full bg-black">
-                {/* Thumbnail container */}
-                <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative aspect-video w-full">
+                <Image 
+                  src={video.thumbnailUrl}
+                  alt={video.title}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center group-hover:bg-opacity-30 transition-opacity">
                   <div className="w-0 h-0 border-t-[20px] border-b-[20px] border-l-[32px] border-transparent border-l-white opacity-80" />
                 </div>
-                {video.duration && (
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 px-1.5 py-0.5 rounded text-white text-sm">
-                    {video.duration}
-                  </div>
-                )}
               </div>
               
               <div className="p-4">
