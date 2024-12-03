@@ -1,16 +1,20 @@
-// src/app/page.js
 "use client";
 
-import VideoGrid from '@/app/components/video/VideoGrid'
-import FeaturedVideo from '@/app/components/video/FeaturedVideo'
-import { db } from '@/app/lib/firebase'
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
-import { useEffect, useState } from 'react';
+import VideoGrid from "@/app/components/video/VideoGrid";
+import FeaturedVideo from "@/app/components/video/FeaturedVideo";
+import { Hero } from "@/app/components/layout/Hero";
+import { db } from "@/app/lib/firebase";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 async function getVideos() {
-  const q = query(collection(db, "videos"), orderBy("createdAt", "desc"), limit(12));
+  const q = query(
+    collection(db, "videos"),
+    orderBy("createdAt", "desc"),
+    limit(12)
+  );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 export default function Home() {
@@ -33,16 +37,21 @@ export default function Home() {
   const remainingVideos = videos.slice(4);
 
   return (
-    <div className="space-y-8">
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-4">Featured Videos</h2>
-        <FeaturedVideo videos={featuredVideos} />
+    <div className="-mt-16">
+      <div className="flex justify-center w-full -ml-32">
+        <Hero />
       </div>
-      
-      <div>
-        <h2 className="text-2xl font-bold mb-4">More Videos</h2>
-        <VideoGrid videos={remainingVideos} />
+      <div className="px-4 lg:px-16 space-y-8">
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-4">Featured Videos</h2>
+          <FeaturedVideo videos={featuredVideos} />
+        </div>
+        
+        <div>
+          <h2 className="text-2xl font-bold mb-4">More Videos</h2>
+          <VideoGrid videos={remainingVideos} />
+        </div>
       </div>
     </div>
-  )
+  );
 }
