@@ -4,13 +4,13 @@ import { doc, getDoc } from 'firebase/firestore';
 import VideoPlayer from './VideoPlayer';
 
 export default async function VideoPage({ params }) {
-  const id = await params.id;
+  const { id } = await params;
+  
   const videoDoc = await getDoc(doc(db, 'videos', id));
   const rawVideo = videoDoc.exists() ? videoDoc.data() : null;
 
   if (!rawVideo) return <div>Video not found</div>;
 
-  // Remove timestamp fields for serialization
   const { createdAt, ...rest } = rawVideo;
 
   return (
