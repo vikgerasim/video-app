@@ -1,17 +1,6 @@
-// app/lib/storage.js
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from './firebase';
-=======
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "./firebase";
->>>>>>> f5a50e810a42ce4ee928a68283b7987cfba7745e
 
 const storage = getStorage();
 
@@ -31,7 +20,6 @@ export class VideoUploadError extends Error {
 }
 
 export async function uploadVideo(file, metadata, userId, onProgress) {
-  // Validate file
   if (!file) {
     throw new VideoUploadError('No file provided', 'no_file');
   }
@@ -44,12 +32,10 @@ export async function uploadVideo(file, metadata, userId, onProgress) {
     throw new VideoUploadError('Invalid file type. Please upload a valid video file', 'invalid_file_type');
   }
 
-  // Create unique filename
   const fileExtension = file.name.split('.').pop();
   const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substr(2)}.${fileExtension}`;
   const storageRef = ref(storage, `videos/${userId}/${uniqueFileName}`);
 
-  // Set metadata
   const videoMetadata = {
     contentType: file.type,
     customMetadata: {
@@ -60,9 +46,7 @@ export async function uploadVideo(file, metadata, userId, onProgress) {
   const uploadTask = uploadBytesResumable(storageRef, file, videoMetadata);
 
   return new Promise((resolve, reject) => {
-<<<<<<< HEAD
     uploadTask.on('state_changed',
-      // Progress handler
       (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         if (onProgress) {
@@ -74,7 +58,6 @@ export async function uploadVideo(file, metadata, userId, onProgress) {
           });
         }
       },
-      // Error handler
       (error) => {
         switch (error.code) {
           case 'storage/unauthorized':
@@ -89,24 +72,33 @@ export async function uploadVideo(file, metadata, userId, onProgress) {
             break;
         }
       },
-      // Success handler
       async () => {
         try {
           const url = await getDownloadURL(uploadTask.snapshot.ref);
           
           const videoDoc = await addDoc(collection(db, 'videos'), {
-            ...metadata,
+            title: metadata.title,
+            description: metadata.description || '',
             userId,
             url,
             fileName: uniqueFileName,
             originalFileName: file.name,
             fileSize: file.size,
             fileType: file.type,
+            thumbnailUrl: metadata.thumbnailUrl || '',
+            embedUrl: metadata.embedUrl || '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             views: 0,
-            likes: 0,
-            status: 'published'
+            likes: [],
+            status: 'published',
+            categories: {
+              carMake: metadata.carMake || '',
+              carModel: metadata.carModel || '',
+              yearRange: metadata.yearRange || '',
+              workType: metadata.workType || '',
+              systemCategory: metadata.systemCategory || ''
+            }
           });
 
           resolve({
@@ -122,7 +114,6 @@ export async function uploadVideo(file, metadata, userId, onProgress) {
   });
 }
 
-// Optional: Add a function to cancel ongoing uploads
 export function cancelUpload(uploadTask) {
   if (uploadTask && typeof uploadTask.cancel === 'function') {
     uploadTask.cancel();

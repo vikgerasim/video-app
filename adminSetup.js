@@ -1,13 +1,15 @@
-// app/lib/firebase.js
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-// app/lib/firebase.js - Add this function
-import { doc, setDoc, writeBatch } from 'firebase/firestore';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import serviceAccount from './serviceAccountKey.json';
 
-export async function setupCategories() {
-  const batch = writeBatch(db);
+initializeApp({
+  credential: cert(serviceAccount)
+});
+
+const db = getFirestore();
+
+async function setupCategories() {
+  const batch = db.batch();
 
   const categories = {
     carMakes: {
@@ -40,23 +42,21 @@ export async function setupCategories() {
 
   for (const [category, items] of Object.entries(categories)) {
     for (const [id, data] of Object.entries(items)) {
-      batch.set(doc(db, 'categories', category, id), data);
+      const ref = db.collection('categories').doc(category).collection('items').doc(id);
+      batch.set(ref, data);
     }
   }
 
   await batch.commit();
+  console.log('Categories setup complete');
 }
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-};
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+setupCategories()
+  .then(() => {
+    console.log('Setup completed successfully');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('Setup failed:', error);
+    process.exit(1);
+  });

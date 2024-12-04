@@ -1,5 +1,5 @@
-"use client";
-
+'use client';
+import { Suspense } from 'react';
 import VideoGrid from "@/app/components/video/VideoGrid";
 import FeaturedVideo from "@/app/components/video/FeaturedVideo";
 import { Hero } from "@/app/components/layout/Hero";
@@ -7,32 +7,15 @@ import { db } from "@/app/lib/firebase";
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
-async function getVideos() {
-  const q = query(
-    collection(db, "videos"),
-    orderBy("createdAt", "desc"),
-    limit(12)
+function LoadingState() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
   );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-export default function Home() {
-  const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      const fetchedVideos = await getVideos();
-      setVideos(fetchedVideos);
-      setLoading(false);
-    };
-
-    fetchVideos();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-
+function Content({ videos }) {
   const featuredVideos = videos.slice(0, 4);
   const remainingVideos = videos.slice(4);
 
@@ -53,5 +36,35 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      const q = query(
+        collection(db, "videos"),
+        orderBy("createdAt", "desc"),
+        limit(12)
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedVideos = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      }));
+      setVideos(fetchedVideos);
+      setLoading(false);
+    };
+
+    fetchVideos();
+  }, []);
+
+  return (
+    <Suspense fallback={<LoadingState />}>
+      {loading ? <LoadingState /> : <Content videos={videos} />}
+    </Suspense>
   );
 }
