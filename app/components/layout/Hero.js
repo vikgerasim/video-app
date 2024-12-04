@@ -80,7 +80,7 @@ export function Hero() {
               </motion.div>
             </div>
           </div>
-          <div className="w-3/5 mx-auto">
+          <div className="w-4/5 mx-auto">
             <motion.div
               animate={fadeInInView ? "animate" : "initial"}
               variants={fadeUpVariants}
