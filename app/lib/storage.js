@@ -1,3 +1,4 @@
+// app/lib/storage.js
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from './firebase';

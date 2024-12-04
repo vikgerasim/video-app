@@ -179,7 +179,7 @@ export default function Navbar() {
             </button>
           ) : (
             <Link href="/signin" className="relative z-[1] py-2">
-              <span className="relative block text-sm font-medium transition-colors duration-200 hover:text-primary tracking-tight text-primary/60">
+              <span className="relative block text-sm font-medium transition-colors px-2 duration-200 hover:text-primary tracking-tight text-primary/60">
                 Sign In
               </span>
             </Link>

@@ -15,7 +15,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     <div 
       className={`${
         isCollapsed ? 'w-24' : 'w-48'
-      } h-screen bg-white border-r border-gray-200 fixed left-0 top-16 z-40 transition-all duration-300`}
+      } h-screen bg-white border-t border-r border-gray-200 fixed left-0 top-16 z-40 transition-all duration-300`}
     >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}

@@ -11,7 +11,7 @@ export default function AppLayout({ children }) {
   return (
     <div className="flex flex-col">
       <Navbar/>
-      <div className="flex flex-grow w-full">
+      <div className="w-full">
         <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
         <main className={`transition-all duration-300 flex-grow mt-14 ${isCollapsed ? 'ml-24' : 'ml-48'}`}>
           {children}
