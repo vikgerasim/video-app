@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, Grid, User, Menu } from 'lucide-react';
+import { Home, Grid, User, Menu, Video } from 'lucide-react';
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const menuItems = [
     { name: 'Home', icon: Home, href: '/' },
-    { name: 'Categories', icon: Grid, href: '/categories' },
+    { name: 'Videos', icon: Video, href: '/videos' },
     { name: 'You', icon: User, href: '/profile' },
   ];
 

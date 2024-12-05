@@ -93,7 +93,7 @@ export default function Navbar() {
           <button
             onClick={() => {
               setActiveTab("Profile");
-              router.push(`/profile/${user.uid}`);
+              router.push(`/profile`);
             }}
             className={cn("relative z-[1] px-4 py-2", {
               "z-0": activeTab === "Profile",
