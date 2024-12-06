@@ -37,28 +37,39 @@ export default function EnhancedUploadForm() {
     systemCategories: [],
   });
 
+  const validateVimeoUrl = (url) => {
+    // Regular expression to match Vimeo URL pattern
+    const vimeoPattern = /^https:\/\/vimeo\.com\/\d+\/[a-zA-Z0-9]+$/;
+    if (!vimeoPattern.test(url)) {
+      throw new Error("Invalid Vimeo URL format. Expected format: https://vimeo.com/[videoId]/[hash]");
+    }
+    return true;
+  };
+
   const getVimeoEmbedUrl = (url) => {
     try {
+      validateVimeoUrl(url);
       const [, , , videoId, hash] = url.split("/");
       return `https://player.vimeo.com/video/${videoId}?h=${hash}`;
     } catch (error) {
-      return null;
+      throw new Error(error.message);
     }
   };
 
   const getVimeoThumbnail = async (url) => {
     try {
+      validateVimeoUrl(url);
       const [, , , videoId, hash] = url.split("/");
       const response = await fetch(
         `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${videoId}/${hash}`
       );
       if (!response.ok) {
-        return "https://picsum.photos/800/400";
+        throw new Error("Failed to fetch video thumbnail");
       }
       const data = await response.json();
       return data.thumbnail_url || "https://picsum.photos/800/400";
     } catch (error) {
-      return "https://picsum.photos/800/400";
+      throw new Error(error.message);
     }
   };
 
@@ -66,13 +77,13 @@ export default function EnhancedUploadForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
-      const embedUrl = getVimeoEmbedUrl(formData.videoUrl);
-      if (!embedUrl) {
-        throw new Error("Invalid Vimeo URL");
-      }
+      // Validate URL format first
+      validateVimeoUrl(formData.videoUrl);
 
+      const embedUrl = getVimeoEmbedUrl(formData.videoUrl);
       const thumbnailUrl = await getVimeoThumbnail(formData.videoUrl);
 
       await addDoc(collection(db, "videos"), {
@@ -102,12 +113,12 @@ export default function EnhancedUploadForm() {
         systemCategory: "",
       });
     } catch (error) {
-      console.error("Upload error:", error);
       setError(error.message || "Failed to add video");
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     async function fetchCategories() {
       const makes = await getDocs(collection(db, "categories/carMakes/items"));
@@ -145,6 +156,7 @@ export default function EnhancedUploadForm() {
               onChange={(e) =>
                 setFormData({ ...formData, videoUrl: e.target.value })
               }
+              placeholder="https://vimeo.com/[videoId]/[hash]"
               required
             />
           </div>

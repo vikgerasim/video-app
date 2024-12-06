@@ -17,6 +17,7 @@ export default function SignIn() {
     try {
       if (isSignUp) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+<<<<<<< HEAD
         await setDoc(doc(db, 'users', userCredential.user.uid), { email: userCredential.user.email,
              createdAt: new Date().toISOString(),
              isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca'].includes(email) });

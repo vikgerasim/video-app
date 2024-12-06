@@ -39,10 +39,9 @@ function Content({ videos }) {
   );
 }
 
-export default function Home() {
+function VideoContent() {
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const fetchVideos = async () => {
       const q = query(
@@ -56,15 +55,22 @@ export default function Home() {
         ...doc.data() 
       }));
       setVideos(fetchedVideos);
-      setLoading(false);
     };
 
     fetchVideos();
   }, []);
 
+  if (videos.length === 0) {
+    return <LoadingState />;
+  }
+
+  return <Content videos={videos} />;
+}
+
+export default function Home() {
   return (
     <Suspense fallback={<LoadingState />}>
-      {loading ? <LoadingState /> : <Content videos={videos} />}
+      <VideoContent />
     </Suspense>
   );
 }
