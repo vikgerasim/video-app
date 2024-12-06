@@ -41,7 +41,7 @@ export default function SignIn() {
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           email: userCredential.user.email,
           createdAt: new Date().toISOString(),
-          isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca'].includes(email)
+          isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca', 'derek.yadlowski@sait.ca'].includes(email)
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -61,7 +61,7 @@ export default function SignIn() {
       await setDoc(doc(db, 'users', result.user.uid), {
         email: result.user.email,
         createdAt: new Date().toISOString(),
-        isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca'].includes(result.user.email)
+        isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca', 'derek.yadlowski@sait.ca'].includes(result.user.email)
       }, { merge: true });
       router.push('/');
     } catch (error) {
