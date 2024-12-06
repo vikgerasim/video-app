@@ -17,11 +17,9 @@ export default function SignIn() {
     try {
       if (isSignUp) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
-          email: userCredential.user.email,
-          createdAt: new Date().toISOString(),
-          isAdmin: email === 'gabriel.antonelli.actuariat@gmail.com'
-        });
+        await setDoc(doc(db, 'users', userCredential.user.uid), { email: userCredential.user.email,
+             createdAt: new Date().toISOString(),
+             isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca'].includes(email) });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
@@ -36,11 +34,9 @@ export default function SignIn() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      await setDoc(doc(db, 'users', result.user.uid), {
-        email: result.user.email,
-        createdAt: new Date().toISOString(),
-        isAdmin: result.user.email === 'gabriel.antonelli.actuariat@gmail.com'
-      }, { merge: true });
+      await setDoc(doc(db, 'users', result.user.uid), {   email: result.user.email,
+           createdAt: new Date().toISOString(),
+              isAdmin: ['gabriel.antonelli.actuariat@gmail.com', 'gerasimenkos@shaw.ca'].includes(result.user.email) }, { merge: true });
       router.push('/');
     } catch (error) {
       console.error('Google sign in error:', error);
