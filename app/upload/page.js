@@ -39,17 +39,26 @@ export default function EnhancedUploadForm() {
 
   const validateVimeoUrl = (url) => {
     // Regular expression to match Vimeo URL pattern
-    const vimeoPattern = /^https:\/\/vimeo\.com\/\d+\/[a-zA-Z0-9]+$/;
-    if (!vimeoPattern.test(url)) {
-      throw new Error("Invalid Vimeo URL format. Expected format: https://vimeo.com/[videoId]/[hash]");
+    const vimeoPattern =
+      /^https:\/\/(player\.)?vimeo\.com\/(video\/)?(\d+)(?:\/([a-zA-Z0-9]+)|[?]h=([a-zA-Z0-9]+))$/;
+
+    const match = url.match(vimeoPattern);
+    if (!match) {
+      throw new Error(
+        "Invalid Vimeo URL format. Expected format: https://vimeo.com/[videoId]/[hash] or https://player.vimeo.com/video/[videoId]?h=[hash]"
+      );
     }
-    return true;
+
+    // Extract videoId and hash from either format
+    const videoId = match[3];
+    const hash = match[4] || match[5]; // hash could be in 4th or 5th group depending on format
+
+    return { videoId, hash };
   };
 
   const getVimeoEmbedUrl = (url) => {
     try {
-      validateVimeoUrl(url);
-      const [, , , videoId, hash] = url.split("/");
+      const { videoId, hash } = validateVimeoUrl(url);
       return `https://player.vimeo.com/video/${videoId}?h=${hash}`;
     } catch (error) {
       throw new Error(error.message);
@@ -58,8 +67,7 @@ export default function EnhancedUploadForm() {
 
   const getVimeoThumbnail = async (url) => {
     try {
-      validateVimeoUrl(url);
-      const [, , , videoId, hash] = url.split("/");
+      const { videoId, hash } = validateVimeoUrl(url);
       const response = await fetch(
         `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${videoId}/${hash}`
       );
