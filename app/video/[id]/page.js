@@ -4,7 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import VideoPlayer from './VideoPlayer';
 
 export default async function VideoPage({ params }) {
-  const { id } = params;
+  const { id } = await params;
   
   const videoDoc = await getDoc(doc(db, 'videos', id));
   const rawVideo = videoDoc.exists() ? videoDoc.data() : null;

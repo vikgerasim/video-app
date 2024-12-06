@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -16,8 +16,38 @@ import {
   query,
   orderBy,
   deleteDoc,
+  where,
 } from "firebase/firestore";
-import { Heart, MessageCircle, Trash2, Settings, Battery, Calendar } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Trash2,
+  Settings,
+  Battery,
+  Calendar,
+} from "lucide-react";
+
+const UserAvatar = ({ user, comment }) => {
+  const isGoogleUser = comment.isGoogleUser;
+
+  if (isGoogleUser) {
+    return (
+      <Image
+        src={comment.userPhoto || "/default-avatar.png"}
+        alt={comment.userName}
+        width={40}
+        height={40}
+        className="rounded-full"
+      />
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 text-white">
+      <span className="text-lg font-medium">U</span>
+    </div>
+  );
+};
 
 const VideoPlayer = ({ video }) => {
   const [user] = useAuthState(auth);
@@ -32,19 +62,21 @@ const VideoPlayer = ({ video }) => {
 
   useEffect(() => {
     if (!videoId) return;
-  
+
     const videoRef = doc(db, "videos", videoId);
     return onSnapshot(videoRef, (doc) => {
       const videoData = doc.data();
       if (!videoData) return;
-      
-      setIsLiked(user && videoData.likes ? videoData.likes.includes(user.uid) : false);
+
+      setIsLiked(
+        user && videoData.likes ? videoData.likes.includes(user.uid) : false
+      );
       setLikeCount(videoData.likes?.length || 0);
     });
   }, [videoId, user]);
 
   useEffect(() => {
-    if (!videoId) return;
+    if (!videoId || !user) return; // Only increment if user is logged in
     const incrementViews = async () => {
       try {
         const videoRef = doc(db, "videos", videoId);
@@ -56,12 +88,16 @@ const VideoPlayer = ({ video }) => {
       }
     };
     incrementViews();
-  }, [videoId]);
+  }, [videoId, user]);
 
   useEffect(() => {
     if (!videoId) return;
-    const commentsRef = collection(db, "videos", videoId, "comments");
-    const q = query(commentsRef, orderBy("createdAt", "desc"));
+    const commentsRef = collection(db, "comments");
+    const q = query(
+      commentsRef,
+      where("videoId", "==", videoId),
+      orderBy("createdAt", "desc")
+    );
 
     return onSnapshot(q, (snapshot) => {
       const comments = snapshot.docs.map((doc) => ({
@@ -78,7 +114,7 @@ const VideoPlayer = ({ video }) => {
     try {
       const videoRef = doc(db, "videos", videoId);
       await updateDoc(videoRef, {
-        likes: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
+        likes: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid),
       });
     } catch (error) {
       console.error("Error updating likes:", error);
@@ -93,11 +129,19 @@ const VideoPlayer = ({ video }) => {
     try {
       setIsSubmitting(true);
       setError("");
-      await addDoc(collection(db, "videos", videoId, "comments"), {
+
+      const isGoogleUser = user.providerData[0]?.providerId === "google.com";
+      const userName = isGoogleUser
+        ? user.displayName || "Anonymous"
+        : `user${user.uid.slice(0, 8)}`;
+
+      await addDoc(collection(db, "comments"), {
         text: newComment,
+        videoId,
         userId: user.uid,
-        userName: user.displayName || 'Anonymous',
-        userPhoto: user.photoURL || '/default-avatar.png',
+        userName,
+        isGoogleUser,
+        userPhoto: isGoogleUser ? user.photoURL : null,
         createdAt: new Date(),
       });
       setNewComment("");
@@ -110,9 +154,9 @@ const VideoPlayer = ({ video }) => {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!user || !videoId || !commentId) return;
+    if (!user || !commentId) return;
     try {
-      const commentRef = doc(db, "videos", videoId, "comments", commentId);
+      const commentRef = doc(db, "comments", commentId);
       await deleteDoc(commentRef);
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -121,9 +165,9 @@ const VideoPlayer = ({ video }) => {
   };
 
   const formatDate = (date) => {
-    return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
+    return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
       Math.ceil((date - new Date()) / (1000 * 60 * 60 * 24)),
-      'day'
+      "day"
     );
   };
 
@@ -174,8 +218,8 @@ const VideoPlayer = ({ video }) => {
             onClick={handleLike}
             disabled={!user}
             className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
-              isLiked 
-                ? "bg-blue-500 text-white hover:bg-blue-600" 
+              isLiked
+                ? "bg-blue-500 text-white hover:bg-blue-600"
                 : "bg-gray-100 hover:bg-gray-200"
             }`}
           >
@@ -222,17 +266,14 @@ const VideoPlayer = ({ video }) => {
             <h2 className="font-semibold text-lg">
               Comments ({comments.length})
             </h2>
-            
+
             {comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3 p-4 rounded-lg hover:bg-gray-50">
-                  <Image
-                    src={comment.userPhoto || '/default-avatar.png'}
-                    alt={comment.userName}
-                    width={60}
-                    height={40}
-                    className="rounded-full"
-                  />
+                <div
+                  key={comment.id}
+                  className="flex gap-3 p-4 rounded-lg hover:bg-gray-50"
+                >
+                  <UserAvatar user={user} comment={comment} />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -283,9 +324,12 @@ const VideoPlayer = ({ video }) => {
             </form>
           ) : (
             <div className="border-t pt-4">
-              <p className="p-4 bg-gray-50 rounded-lg text-center">
-                Please login to like and comment
-              </p>
+              <a
+                href="/signin"
+                className="block w-full p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center"
+              >
+                Sign in to like and comment
+              </a>
             </div>
           )}
         </div>
