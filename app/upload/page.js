@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import { useState, useEffect } from "react";
 import { db } from "../lib/firebase";
 import { collection, addDoc, doc, getDoc, getDocs } from "firebase/firestore";
@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-
+ 
 export default function EnhancedUploadForm() {
   const [formData, setFormData] = useState({
     title: "",
@@ -36,40 +36,39 @@ export default function EnhancedUploadForm() {
     workTypes: [],
     systemCategories: [],
   });
-
+ 
   const validateVimeoUrl = (url) => {
-    // Regular expression to match Vimeo URL pattern
-    const vimeoPattern =
-      /^https:\/\/(player\.)?vimeo\.com\/(video\/)?(\d+)(?:\/([a-zA-Z0-9]+)|[?]h=([a-zA-Z0-9]+))$/;
-
+    // Regular expression to match only player.vimeo.com format
+    const vimeoPattern = /^https:\/\/player\.vimeo\.com\/video\/(\d+)\?h=([a-zA-Z0-9]+)$/;
+ 
     const match = url.match(vimeoPattern);
     if (!match) {
       throw new Error(
-        "Invalid Vimeo URL format. Expected format: https://vimeo.com/[videoId]/[hash] or https://player.vimeo.com/video/[videoId]?h=[hash]"
+        "Invalid Vimeo URL format. URL must be in the format: https://player.vimeo.com/video/[videoId]?h=[hash]"
       );
     }
-
-    // Extract videoId and hash from either format
-    const videoId = match[3];
-    const hash = match[4] || match[5]; // hash could be in 4th or 5th group depending on format
-
-    return { videoId, hash };
+ 
+    return {
+      videoId: match[1],
+      hash: match[2]
+    };
   };
-
+ 
+  // Since we're only accepting the embed URL format now, we don't need to transform it
   const getVimeoEmbedUrl = (url) => {
     try {
-      const { videoId, hash } = validateVimeoUrl(url);
-      return `https://player.vimeo.com/video/${videoId}?h=${hash}`;
+      validateVimeoUrl(url);
+      return url; // Return the URL as-is since it's already in the correct format
     } catch (error) {
       throw new Error(error.message);
     }
   };
-
+ 
   const getVimeoThumbnail = async (url) => {
     try {
-      const { videoId, hash } = validateVimeoUrl(url);
+      const { videoId } = validateVimeoUrl(url);
       const response = await fetch(
-        `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${videoId}/${hash}`
+        `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${videoId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch video thumbnail");
@@ -80,20 +79,20 @@ export default function EnhancedUploadForm() {
       throw new Error(error.message);
     }
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
-
+ 
     try {
       // Validate URL format first
       validateVimeoUrl(formData.videoUrl);
-
+ 
       const embedUrl = getVimeoEmbedUrl(formData.videoUrl);
       const thumbnailUrl = await getVimeoThumbnail(formData.videoUrl);
-
+ 
       await addDoc(collection(db, "videos"), {
         ...formData,
         embedUrl,
@@ -109,7 +108,7 @@ export default function EnhancedUploadForm() {
           systemCategory: formData.systemCategory,
         },
       });
-
+ 
       setSuccess("Video added successfully!");
       setFormData({
         title: "",
@@ -126,7 +125,7 @@ export default function EnhancedUploadForm() {
       setLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     async function fetchCategories() {
       const makes = await getDocs(collection(db, "categories/carMakes/items"));
@@ -136,7 +135,7 @@ export default function EnhancedUploadForm() {
       const systemCats = await getDocs(
         collection(db, "categories/systemCategories/items")
       );
-
+ 
       setCategories({
         carMakes: makes.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
         workTypes: workTypes.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
@@ -148,7 +147,7 @@ export default function EnhancedUploadForm() {
     }
     fetchCategories();
   }, []);
-
+ 
   return (
     <Card>
       <CardHeader>
@@ -164,11 +163,11 @@ export default function EnhancedUploadForm() {
               onChange={(e) =>
                 setFormData({ ...formData, videoUrl: e.target.value })
               }
-              placeholder="https://vimeo.com/[videoId]/[hash]"
+              placeholder="https://player.vimeo.com/video/[videoId]?h=[hash]"
               required
             />
           </div>
-
+ 
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -180,7 +179,7 @@ export default function EnhancedUploadForm() {
               required
             />
           </div>
-
+ 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Car Make</Label>
@@ -202,7 +201,7 @@ export default function EnhancedUploadForm() {
                 </SelectContent>
               </Select>
             </div>
-
+ 
             <div className="space-y-2">
               <Label>Car Model</Label>
               <Input
@@ -214,7 +213,7 @@ export default function EnhancedUploadForm() {
               />
             </div>
           </div>
-
+ 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Year Range</Label>
@@ -226,7 +225,7 @@ export default function EnhancedUploadForm() {
                 placeholder="e.g., 2007-2011"
               />
             </div>
-
+ 
             <div className="space-y-2">
               <Label>Work Type</Label>
               <Select
@@ -239,17 +238,16 @@ export default function EnhancedUploadForm() {
                   <SelectValue placeholder="Select work type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="filter">Filter Replacement</SelectItem>
-                  <SelectItem value="bulb">Bulb Replacement</SelectItem>
-                  <SelectItem value="battery">Battery Replacement</SelectItem>
-                  <SelectItem value="oil">Oil Change</SelectItem>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="diagnostics">Diagnostics</SelectItem>
+                  {categories.workTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
-
+ 
           <div className="space-y-2">
             <Label>System Category</Label>
             <Select
@@ -262,28 +260,27 @@ export default function EnhancedUploadForm() {
                 <SelectValue placeholder="Select system category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="engine">Engine</SelectItem>
-                <SelectItem value="electrical">Electrical</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="interior">Interior</SelectItem>
-                <SelectItem value="exterior">Exterior</SelectItem>
-                <SelectItem value="security">Key/Security</SelectItem>
+                {categories.systemCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-
+ 
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
+ 
           {success && (
             <Alert className="bg-green-50 text-green-700 border-green-200">
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
-
+ 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? (
               <>
@@ -299,3 +296,4 @@ export default function EnhancedUploadForm() {
     </Card>
   );
 }
+ 
